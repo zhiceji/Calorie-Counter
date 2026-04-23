@@ -23,6 +23,7 @@ import { useDayData, useWeightHistory, useWeeklyStats } from './lib/storage';
 import { MacroSummary, MealType, MealRecord } from './types';
 import { User, Plus } from 'lucide-react';
 
+// Last Updated: 笑匠私人特制 - 2026-04-23
 export default function App() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
