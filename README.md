@@ -1,20 +1,59 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# 卡路里计数器
 
-# Run and deploy your AI Studio app
+一款基于 AI 的饮食管理应用，使用自然语言识别食物热量和营养成分。本地存储保护隐私，毫秒级响应。
 
-This contains everything you need to run your app locally.
+## 功能特点
 
-View your app in AI Studio: https://ai.studio/apps/9d90fa77-eae9-4cef-9dc3-e141e4793029
+- **AI 智能识别**：输入食物名称，自动识别热量和碳水/蛋白质/脂肪
+- **本地存储**：所有数据存储在本地，保护隐私
+- **热量统计**：每日目标设定，追踪摄入与消耗
+- **宏量营养素**：直观查看碳水、蛋白质、脂肪摄入进度
+- **组间休息计时器**：健身辅助，记录组数和休息时间
+- **周报统计**：查看一周的饮食和运动数据
 
-## Run Locally
+## 技术栈
 
-**Prerequisites:**  Node.js
+- React + TypeScript + Tailwind CSS
+- Vite 构建工具
+- Capacitor 打包为 Android 应用
+- DeepSeek API 提供 AI 识别能力
 
+## 运行项目
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+**环境要求**：Node.js
+
+1. 安装依赖：
+   ```bash
+   npm install
+   ```
+
+2. 启动开发服务器：
+   ```bash
+   npm run dev
+   ```
+
+## 打包 APK
+
+1. 构建 Web 应用：
+   ```bash
+   npm run build
+   ```
+
+2. 同步到 Android：
+   ```bash
+   npx cap sync android
+   ```
+
+3. 打包 APK：
+   ```bash
+   cd android
+   ./gradlew assembleDebug
+   ```
+
+APK 文件位于：`android/app/build/outputs/apk/debug/`
+
+## API 配置
+
+首次使用需要在应用内配置 DeepSeek API 密钥（点击右上角用户图标）。
+
+获取 API Key：https://platform.deepseek.com/
