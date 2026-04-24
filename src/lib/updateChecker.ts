@@ -16,7 +16,7 @@ export interface UpdateStatus {
 }
 
 const GITHUB_REPO = 'zhiceji/Calorie-Counter';
-const CURRENT_VERSION = '1.0.10';
+const CURRENT_VERSION = '1.0.11';
 
 // 比较版本号，返回 1 表示 a > b, -1 表示 a < b, 0 表示相等
 function compareVersions(a: string, b: string): number {
