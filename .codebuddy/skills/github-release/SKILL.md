@@ -9,7 +9,7 @@ description: |
 
 ## 前提条件
 
-- GitHub Token：`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`
+- GitHub Token：从记忆中获取 `GitHub Token zhiceji`
 - gh CLI 路径：`C:\Program Files\GitHub CLI\gh.exe`（可选）
 
 ## 发布流程
@@ -43,7 +43,7 @@ git push origin v<版本号>
 ### Step 4: 创建 Release 并上传 APK（使用 GitHub API）
 
 ```powershell
-$token = "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"
+$token = "<从记忆中获取 GitHub Token zhiceji>"
 $owner = "zhiceji"
 $repo = "Calorie-Counter"
 $version = "<版本号>"
