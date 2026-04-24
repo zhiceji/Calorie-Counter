@@ -42,23 +42,31 @@ function compareVersions(a: string, b: string): number {
 
 // 获取最新版本信息
 export async function checkForUpdate(): Promise<UpdateStatus> {
-  let lastError = '';
-  
+  // 使用 Promise.race 实现超时
+  const withTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> => {
+    return Promise.race([
+      promise,
+      new Promise<T>((_, reject) => 
+        setTimeout(() => reject(new Error('请求超时')), ms)
+      )
+    ]);
+  };
+
   // 尝试多个 API 端点
   for (const apiUrl of API_ENDPOINTS) {
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒超时
+      console.log(`尝试 API: ${apiUrl}`);
+      const response = await withTimeout(
+        fetch(apiUrl, {
+          headers: {
+            'Accept': 'application/vnd.github.v3+json',
+            'User-Agent': 'CalorieCounter-App'
+          }
+        }),
+        8000 // 8秒超时
+      );
       
-      const response = await fetch(apiUrl, {
-        headers: {
-          'Accept': 'application/vnd.github.v3+json',
-          'User-Agent': 'CalorieCounter-App'
-        },
-        signal: controller.signal
-      });
-      
-      clearTimeout(timeoutId);
+      console.log(`API 响应状态: ${response.status}`);
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
@@ -69,7 +77,7 @@ export async function checkForUpdate(): Promise<UpdateStatus> {
       // 从 tag_name 获取版本号 (如 "v1.1.0" -> "1.1.0")
       const latestVersion = (data.tag_name || '').replace(/^v/, '');
       
-      // 查找 APK 文件，使用 GitHub 原始下载链接
+      // 查找 APK 文件
       let apkUrl = '';
       for (const asset of data.assets || []) {
         if (asset.name.endsWith('.apk')) {
@@ -94,19 +102,17 @@ export async function checkForUpdate(): Promise<UpdateStatus> {
         releaseInfo
       };
     } catch (error: any) {
-      lastError = error.message || 'Unknown error';
-      console.warn(`API ${apiUrl} failed:`, error);
-      continue; // 尝试下一个端点
+      console.warn(`API ${apiUrl} 失败:`, error.message);
+      continue;
     }
   }
   
   // 所有端点都失败了
-  console.error('所有 API 端点都失败:', lastError);
   return {
     hasUpdate: false,
     currentVersion: CURRENT_VERSION,
     latestVersion: CURRENT_VERSION,
-    error: '检查更新失败，请稍后重试'
+    error: '网络连接失败，请检查网络后重试'
   };
 }
 
