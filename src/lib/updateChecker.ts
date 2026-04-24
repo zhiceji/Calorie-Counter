@@ -54,18 +54,13 @@ export async function checkForUpdate(): Promise<UpdateStatus> {
     // 从 tag_name 获取版本号 (如 "v1.1.0" -> "1.1.0")
     const latestVersion = (data.tag_name || '').replace(/^v/, '');
     
-    // 查找 APK 文件
+    // 查找 APK 文件，使用 GitHub 原始下载链接
     let apkUrl = '';
-    let apkName = '';
     for (const asset of data.assets || []) {
       if (asset.name.endsWith('.apk')) {
-        apkName = asset.name;
+        apkUrl = asset.browser_download_url;
         break;
       }
-    }
-    // 使用 jsDelivr 镜像加速（国内可用）
-    if (apkName) {
-      apkUrl = `https://cdn.jsdelivr.net/gh/${GITHUB_REPO}@${latestVersion}/android/app/build/outputs/apk/debug/${apkName}`;
     }
 
     const releaseInfo: ReleaseInfo = {
