@@ -41,7 +41,8 @@ export default function App() {
   useEffect(() => {
     if (Capacitor.isNativePlatform()) {
       StatusBar.setStyle({ style: Style.Dark }); // 深色图标
-      StatusBar.setBackgroundColor({ color: '#f8fafc' }); // 与页面背景色一致
+      StatusBar.setBackgroundColor({ color: '#ffffff' }); // 白色背景确保状态栏文字可见
+      StatusBar.setOverlaysWebView({ overlay: false }); // 确保状态栏不覆盖内容
     }
   }, []);
   const { data, addRecords, updateMeal, deleteMeal, updateTarget, updateWeight } = useDayData(selectedDate);
