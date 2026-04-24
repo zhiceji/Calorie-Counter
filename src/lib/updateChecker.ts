@@ -17,7 +17,7 @@ export interface UpdateStatus {
 }
 
 const GITHUB_REPO = 'zhiceji/Calorie-Counter';
-const CURRENT_VERSION = '1.0.12';
+const CURRENT_VERSION = '1.0.13';
 
 // API 端点列表（按优先级）
 const API_ENDPOINTS = [
