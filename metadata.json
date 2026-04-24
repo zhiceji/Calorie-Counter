@@ -1,6 +1,5 @@
 {
   "name": "笑匠私人特制",
-  "description": "An AI-powered diet manager that uses Gemini to track calories and macros via text, voice, and photos. Fast, privacy-focused, and millisecond-responsive.",
-  "requestFramePermissions": ["camera"],
-  "majorCapabilities": ["AI Semantic Parsing", "Multi-modal OCR", "Privacy-first Local Storage"]
+  "description": "An AI-powered diet manager that uses DeepSeek to track calories and macros via text. Fast, privacy-focused, and millisecond-responsive.",
+  "majorCapabilities": ["AI Semantic Parsing", "Privacy-first Local Storage"]
 }

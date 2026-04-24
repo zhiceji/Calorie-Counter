@@ -59,7 +59,7 @@ export function StatsModal({ isOpen, onClose, data }: StatsModalProps) {
                 </div>
                 <div>
                   <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Weekly Report</p>
-                  <h3 className="text-2xl font-black text-slate-800 tracking-tight">几何周报统计</h3>
+                  <h3 className="text-2xl font-black text-slate-800 tracking-tight">统计</h3>
                 </div>
               </div>
               <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400">

@@ -14,6 +14,7 @@ import { Dashboard } from './components/Dashboard';
 import { MealSection } from './components/MealSection';
 import { InputBar } from './components/InputBar';
 import { SettingsModal } from './components/SettingsModal';
+import { TargetModal } from './components/TargetModal';
 import { MonthCalendarModal } from './components/MonthCalendarModal';
 import { MealEntryModal } from './components/MealEntryModal';
 import { WeightChart } from './components/WeightChart';
@@ -21,11 +22,12 @@ import { StatsModal } from './components/StatsModal';
 import { RestTimerModal } from './components/RestTimerModal';
 import { useDayData, useWeightHistory, useWeeklyStats } from './lib/storage';
 import { MacroSummary, MealType, MealRecord } from './types';
-import { User, Plus } from 'lucide-react';
+import { User, Plus, Settings } from 'lucide-react';
 
 // Last Updated: 笑匠私人特制 - 2026-04-23
 export default function App() {
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [isTargetOpen, setIsTargetOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isChartOpen, setIsChartOpen] = useState(false);
@@ -73,7 +75,12 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-50 pb-32 font-sans selection:bg-emerald-100 selection:text-emerald-900">
       <header className="flex justify-between items-center px-8 pt-8 pb-4">
-        <div />
+        <button 
+          onClick={() => setIsTargetOpen(true)}
+          className="w-12 h-12 bg-white border border-slate-200 rounded-2xl flex items-center justify-center shadow-sm text-slate-400 transition-all hover:bg-emerald-500 hover:text-white hover:border-emerald-500 group"
+        >
+          <Settings size={20} className="group-hover:scale-110 transition-transform" />
+        </button>
         <button 
           onClick={() => setIsSettingsOpen(true)}
           className="w-12 h-12 bg-white border border-slate-200 rounded-2xl flex items-center justify-center shadow-sm text-slate-400 transition-all hover:bg-slate-900 hover:text-white group"
@@ -81,6 +88,12 @@ export default function App() {
           <User size={20} className="group-hover:scale-110 transition-transform" />
         </button>
       </header>
+
+      <TargetModal 
+        isOpen={isTargetOpen} 
+        onClose={() => setIsTargetOpen(false)}
+        onUpdateTarget={updateTarget}
+      />
 
       <SettingsModal 
         isOpen={isSettingsOpen} 
