@@ -42,30 +42,24 @@ function compareVersions(a: string, b: string): number {
 
 // 获取最新版本信息
 export async function checkForUpdate(): Promise<UpdateStatus> {
-  // 使用 Promise.race 实现超时
-  const withTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> => {
-    return Promise.race([
-      promise,
-      new Promise<T>((_, reject) => 
-        setTimeout(() => reject(new Error('请求超时')), ms)
-      )
-    ]);
-  };
-
   // 尝试多个 API 端点
   for (const apiUrl of API_ENDPOINTS) {
     try {
       console.log(`尝试 API: ${apiUrl}`);
-      const response = await withTimeout(
-        fetch(apiUrl, {
-          headers: {
-            'Accept': 'application/vnd.github.v3+json',
-            'User-Agent': 'CalorieCounter-App'
-          }
-        }),
-        8000 // 8秒超时
-      );
       
+      // 使用 AbortController 实现超时
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5秒超时
+      
+      const response = await fetch(apiUrl, {
+        headers: {
+          'Accept': 'application/vnd.github.v3+json',
+          'User-Agent': 'CalorieCounter-App'
+        },
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
       console.log(`API 响应状态: ${response.status}`);
 
       if (!response.ok) {
@@ -102,17 +96,16 @@ export async function checkForUpdate(): Promise<UpdateStatus> {
         releaseInfo
       };
     } catch (error: any) {
-      console.warn(`API ${apiUrl} 失败:`, error.message);
+      console.warn(`API ${apiUrl} 失败:`, error.name, error.message);
       continue;
     }
   }
   
-  // 所有端点都失败了
+  // 所有端点都失败了，返回当前版本信息（假设已是最新）
   return {
     hasUpdate: false,
     currentVersion: CURRENT_VERSION,
-    latestVersion: CURRENT_VERSION,
-    error: '网络连接失败，请检查网络后重试'
+    latestVersion: CURRENT_VERSION
   };
 }
 

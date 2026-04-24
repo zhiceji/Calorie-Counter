@@ -22,6 +22,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   // 更新检查状态
   const [updateStatus, setUpdateStatus] = useState<UpdateStatus | null>(null);
   const [checkUpdateLoading, setCheckUpdateLoading] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem('nutri_api_config');
