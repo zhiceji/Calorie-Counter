@@ -13,10 +13,18 @@ export interface UpdateStatus {
   currentVersion: string;
   latestVersion: string;
   releaseInfo?: ReleaseInfo;
+  error?: string;
 }
 
 const GITHUB_REPO = 'zhiceji/Calorie-Counter';
-const CURRENT_VERSION = '1.0.11';
+const CURRENT_VERSION = '1.0.12';
+
+// API 端点列表（按优先级）
+const API_ENDPOINTS = [
+  `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`,
+  `https://ghproxy.com/https://api.github.com/repos/${GITHUB_REPO}/releases/latest`,
+  `https://mirror.ghproxy.com/https://api.github.com/repos/${GITHUB_REPO}/releases/latest`,
+];
 
 // 比较版本号，返回 1 表示 a > b, -1 表示 a < b, 0 表示相等
 function compareVersions(a: string, b: string): number {
@@ -34,58 +42,72 @@ function compareVersions(a: string, b: string): number {
 
 // 获取最新版本信息
 export async function checkForUpdate(): Promise<UpdateStatus> {
-  try {
-    const response = await fetch(
-      `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`,
-      {
+  let lastError = '';
+  
+  // 尝试多个 API 端点
+  for (const apiUrl of API_ENDPOINTS) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒超时
+      
+      const response = await fetch(apiUrl, {
         headers: {
           'Accept': 'application/vnd.github.v3+json',
           'User-Agent': 'CalorieCounter-App'
+        },
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // 从 tag_name 获取版本号 (如 "v1.1.0" -> "1.1.0")
+      const latestVersion = (data.tag_name || '').replace(/^v/, '');
+      
+      // 查找 APK 文件，使用 GitHub 原始下载链接
+      let apkUrl = '';
+      for (const asset of data.assets || []) {
+        if (asset.name.endsWith('.apk')) {
+          apkUrl = asset.browser_download_url;
+          break;
         }
       }
-    );
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+      const releaseInfo: ReleaseInfo = {
+        version: latestVersion,
+        downloadUrl: apkUrl,
+        releaseNotes: data.body || '',
+        publishedAt: data.published_at || ''
+      };
+
+      const hasUpdate = compareVersions(latestVersion, CURRENT_VERSION) > 0;
+
+      return {
+        hasUpdate,
+        currentVersion: CURRENT_VERSION,
+        latestVersion,
+        releaseInfo
+      };
+    } catch (error: any) {
+      lastError = error.message || 'Unknown error';
+      console.warn(`API ${apiUrl} failed:`, error);
+      continue; // 尝试下一个端点
     }
-
-    const data = await response.json();
-    
-    // 从 tag_name 获取版本号 (如 "v1.1.0" -> "1.1.0")
-    const latestVersion = (data.tag_name || '').replace(/^v/, '');
-    
-    // 查找 APK 文件，使用 GitHub 原始下载链接
-    let apkUrl = '';
-    for (const asset of data.assets || []) {
-      if (asset.name.endsWith('.apk')) {
-        apkUrl = asset.browser_download_url;
-        break;
-      }
-    }
-
-    const releaseInfo: ReleaseInfo = {
-      version: latestVersion,
-      downloadUrl: apkUrl,
-      releaseNotes: data.body || '',
-      publishedAt: data.published_at || ''
-    };
-
-    const hasUpdate = compareVersions(latestVersion, CURRENT_VERSION) > 0;
-
-    return {
-      hasUpdate,
-      currentVersion: CURRENT_VERSION,
-      latestVersion,
-      releaseInfo
-    };
-  } catch (error) {
-    console.error('检查更新失败:', error);
-    return {
-      hasUpdate: false,
-      currentVersion: CURRENT_VERSION,
-      latestVersion: CURRENT_VERSION
-    };
   }
+  
+  // 所有端点都失败了
+  console.error('所有 API 端点都失败:', lastError);
+  return {
+    hasUpdate: false,
+    currentVersion: CURRENT_VERSION,
+    latestVersion: CURRENT_VERSION,
+    error: '检查更新失败，请稍后重试'
+  };
 }
 
 // 下载 APK 文件

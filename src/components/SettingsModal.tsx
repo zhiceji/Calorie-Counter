@@ -203,7 +203,12 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                           : "bg-slate-50"
                       )}
                     >
-                      {updateStatus.hasUpdate ? (
+                      {updateStatus.error ? (
+                        <div className="flex items-center gap-2 text-sm text-rose-500">
+                          <AlertCircle size={14} />
+                          {updateStatus.error}
+                        </div>
+                      ) : updateStatus.hasUpdate ? (
                         <div className="space-y-3">
                           <div className="flex items-center gap-2">
                             <div className="w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center">
