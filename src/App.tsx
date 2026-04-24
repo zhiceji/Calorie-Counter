@@ -74,21 +74,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 pb-32 font-sans selection:bg-emerald-100 selection:text-emerald-900">
-      <header className="flex justify-between items-center px-8 pt-8 pb-4">
-        <button 
-          onClick={() => setIsTargetOpen(true)}
-          className="w-12 h-12 bg-white border border-slate-200 rounded-2xl flex items-center justify-center shadow-sm text-slate-400 transition-all hover:bg-emerald-500 hover:text-white hover:border-emerald-500 group"
-        >
-          <Settings size={20} className="group-hover:scale-110 transition-transform" />
-        </button>
-        <button 
-          onClick={() => setIsSettingsOpen(true)}
-          className="w-12 h-12 bg-white border border-slate-200 rounded-2xl flex items-center justify-center shadow-sm text-slate-400 transition-all hover:bg-slate-900 hover:text-white group"
-        >
-          <User size={20} className="group-hover:scale-110 transition-transform" />
-        </button>
-      </header>
-
       <TargetModal 
         isOpen={isTargetOpen} 
         onClose={() => setIsTargetOpen(false)}
@@ -111,6 +96,22 @@ export default function App() {
         selectedDate={selectedDate} 
         onDateSelect={setSelectedDate}
         onOpenMonthView={() => setIsCalendarOpen(true)}
+        headerButtons={
+          <div className="flex gap-2">
+            <button 
+              onClick={() => setIsTargetOpen(true)}
+              className="w-12 h-12 bg-white border border-slate-200 rounded-2xl flex items-center justify-center shadow-sm text-slate-400 transition-all hover:bg-emerald-500 hover:text-white hover:border-emerald-500 group"
+            >
+              <Settings size={20} className="group-hover:scale-110 transition-transform" />
+            </button>
+            <button 
+              onClick={() => setIsSettingsOpen(true)}
+              className="w-12 h-12 bg-white border border-slate-200 rounded-2xl flex items-center justify-center shadow-sm text-slate-400 transition-all hover:bg-slate-900 hover:text-white group"
+            >
+              <User size={20} className="group-hover:scale-110 transition-transform" />
+            </button>
+          </div>
+        }
       />
 
       <main className="max-w-4xl mx-auto mt-4">
