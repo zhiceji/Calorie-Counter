@@ -1,5 +1,0 @@
-{
-  "name": "笑匠私人特制",
-  "description": "An AI-powered diet manager that uses DeepSeek to track calories and macros via text. Fast, privacy-focused, and millisecond-responsive.",
-  "majorCapabilities": ["AI Semantic Parsing", "Privacy-first Local Storage"]
-}
