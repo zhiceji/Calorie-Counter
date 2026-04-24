@@ -14,6 +14,7 @@ export function InputBar({ onAdd }: InputBarProps) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isManualModalOpen, setIsManualModalOpen] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -23,11 +24,15 @@ export function InputBar({ onAdd }: InputBarProps) {
     }
     if (isLoading) return;
 
+    setError('');
     setIsLoading(true);
     try {
       const results = await parseFoodInput(input, new Date());
       onAdd(results);
       setInput('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '识别失败');
+      setTimeout(() => setError(''), 3000);
     } finally {
       setIsLoading(false);
     }
@@ -56,6 +61,15 @@ export function InputBar({ onAdd }: InputBarProps) {
               className="absolute -top-12 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg whitespace-nowrap"
             >
               DeepSeek 正在识别中...
+            </motion.div>
+          )}
+          
+          {error && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+              className="absolute -top-12 left-1/2 -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-xl text-[10px] font-bold shadow-lg whitespace-nowrap max-w-[280px] truncate"
+            >
+              {error}
             </motion.div>
           )}
         </div>

@@ -175,7 +175,10 @@ function StatsItem({ label, value, color, prefix = "", suffix = "", isEditable, 
 }
 
 function MacroCircle({ label, current, goal, color }: { label: string, current: number, goal: number, color: string }) {
-  const percentage = Math.min((current / goal) * 100, 100);
+  const rawPercentage = (current / goal) * 100;
+  const percentage = Math.min(rawPercentage, 100);
+  const isOverflow = rawPercentage > 100;
+  const ringColor = isOverflow ? "#ef4444" : color;
   const r = 24;
   const circ = 2 * Math.PI * r;
   const offset = circ - (percentage / 100) * circ;
@@ -187,7 +190,7 @@ function MacroCircle({ label, current, goal, color }: { label: string, current: 
           <circle cx="32" cy="32" r={r} fill="transparent" stroke="#334155" strokeWidth="6" />
           <motion.circle
             cx="32" cy="32" r={r}
-            fill="transparent" stroke={color} strokeWidth="6"
+            fill="transparent" stroke={ringColor} strokeWidth="6"
             strokeDasharray={circ}
             initial={{ strokeDashoffset: circ }}
             animate={{ strokeDashoffset: offset }}
@@ -196,7 +199,7 @@ function MacroCircle({ label, current, goal, color }: { label: string, current: 
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-[10px] font-black text-white">{Math.round(percentage)}%</span>
+          <span className={cn("text-[10px] font-black", isOverflow ? "text-red-400" : "text-white")}>{Math.round(rawPercentage)}%</span>
         </div>
       </div>
       <span className="text-[9px] font-bold text-slate-400">{label}</span>

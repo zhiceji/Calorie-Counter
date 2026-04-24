@@ -15,6 +15,7 @@ import { MealSection } from './components/MealSection';
 import { InputBar } from './components/InputBar';
 import { SettingsModal } from './components/SettingsModal';
 import { TargetModal } from './components/TargetModal';
+import { CloudBackupModal } from './components/CloudBackupModal';
 import { MonthCalendarModal } from './components/MonthCalendarModal';
 import { MealEntryModal } from './components/MealEntryModal';
 import { WeightChart } from './components/WeightChart';
@@ -22,7 +23,7 @@ import { StatsModal } from './components/StatsModal';
 import { RestTimerModal } from './components/RestTimerModal';
 import { useDayData, useWeightHistory, useWeeklyStats } from './lib/storage';
 import { MacroSummary, MealType, MealRecord } from './types';
-import { User, Plus, Settings } from 'lucide-react';
+import { User, Plus, Settings, Cloud } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 
 // Last Updated: 笑匠私人特制 - 2026-04-23
@@ -30,6 +31,7 @@ export default function App() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isTargetOpen, setIsTargetOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isCloudBackupOpen, setIsCloudBackupOpen] = useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isChartOpen, setIsChartOpen] = useState(false);
   const [isStatsOpen, setIsStatsOpen] = useState(false);
@@ -77,6 +79,11 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 pb-32 font-sans selection:bg-emerald-100 selection:text-emerald-900">
+      <CloudBackupModal
+        isOpen={isCloudBackupOpen}
+        onClose={() => setIsCloudBackupOpen(false)}
+      />
+
       <TargetModal 
         isOpen={isTargetOpen} 
         onClose={() => setIsTargetOpen(false)}
@@ -101,6 +108,12 @@ export default function App() {
         onOpenMonthView={() => setIsCalendarOpen(true)}
         headerButtons={
           <div className="flex gap-2">
+            <button 
+              onClick={() => setIsCloudBackupOpen(true)}
+              className="w-12 h-12 bg-white border border-slate-200 rounded-2xl flex items-center justify-center shadow-sm text-slate-400 transition-all hover:bg-blue-500 hover:text-white hover:border-blue-500 group"
+            >
+              <Cloud size={20} className="group-hover:scale-110 transition-transform" />
+            </button>
             <button 
               onClick={() => setIsTargetOpen(true)}
               className="w-12 h-12 bg-white border border-slate-200 rounded-2xl flex items-center justify-center shadow-sm text-slate-400 transition-all hover:bg-emerald-500 hover:text-white hover:border-emerald-500 group"
