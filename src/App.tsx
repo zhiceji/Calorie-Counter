@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { CalendarStrip } from './components/CalendarStrip';
 import { Dashboard } from './components/Dashboard';
 import { MealSection } from './components/MealSection';
