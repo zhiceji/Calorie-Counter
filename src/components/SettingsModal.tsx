@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Settings, Database, Activity, CheckCircle2, AlertCircle } from 'lucide-react';
+import { X, Settings, Activity, CheckCircle2, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ApiConfig, testApiConnection } from '../lib/gemini';
 import { cn } from '../lib/utils';
@@ -11,10 +11,9 @@ interface SettingsModalProps {
 
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const [config, setConfig] = useState<ApiConfig>({
-    engine: 'gemini',
     apiKey: '',
-    baseUrl: 'https://generativelanguage.googleapis.com',
-    model: 'gemini-1.5-flash'
+    baseUrl: 'https://api.deepseek.com',
+    model: 'deepseek-chat'
   });
   const [testStatus, setTestStatus] = useState<{ loading: boolean; success?: boolean; message?: string }>({ loading: false });
 
@@ -41,19 +40,18 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-6 pointer-events-auto">
           <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
             onClick={onClose}
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 pointer-events-auto"
           />
+          
           <motion.div 
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white rounded-[32px] shadow-2xl z-[60] overflow-hidden pointer-events-auto"
+            className="relative w-full max-w-4xl bg-white rounded-[40px] shadow-2xl z-10 overflow-hidden pointer-events-auto"
           >
             <div className="p-8">
               <div className="flex justify-between items-center mb-8">
@@ -61,7 +59,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                   <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center">
                     <Settings size={20} />
                   </div>
-                  <h2 className="text-xl font-black text-slate-800 tracking-tight">账户与 API 设置</h2>
+                  <h2 className="text-xl font-black text-slate-800 tracking-tight">API 设置</h2>
                 </div>
                 <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-full transition-colors">
                   <X size={20} className="text-slate-400" />
@@ -69,54 +67,28 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               </div>
 
               <div className="space-y-6">
-                <div>
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">AI 引擎选择</label>
-                  <div className="grid grid-cols-2 gap-3 p-1 bg-slate-50 rounded-2xl">
-                    <button 
-                      onClick={() => setConfig({ ...config, engine: 'gemini', baseUrl: 'https://generativelanguage.googleapis.com', model: 'gemini-1.5-flash' })}
-                      className={cn(
-                        "py-3 px-4 rounded-xl text-sm font-bold transition-all",
-                        config.engine === 'gemini' ? "bg-white text-emerald-600 shadow-sm" : "text-slate-400 hover:text-slate-600"
-                      )}
-                    >
-                      Google Gemini
-                    </button>
-                    <button 
-                      onClick={() => setConfig({ ...config, engine: 'openai', baseUrl: 'https://api.deepseek.com', model: 'deepseek-chat' })}
-                      className={cn(
-                        "py-3 px-4 rounded-xl text-sm font-bold transition-all",
-                        config.engine === 'openai' ? "bg-white text-emerald-600 shadow-sm" : "text-slate-400 hover:text-slate-600"
-                      )}
-                    >
-                      DeepSeek (OpenAI)
-                    </button>
-                  </div>
-                </div>
-
                 <div className="space-y-4">
                   <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">API 密钥</label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">DeepSeek API 密钥</label>
                     <input 
                       type="password"
                       value={config.apiKey}
                       onChange={(e) => setConfig({ ...config, apiKey: e.target.value })}
-                      placeholder={config.engine === 'gemini' ? "可选 (默认使用系统内置)" : "请输入您的 DeepSeek Key"}
+                      placeholder="请输入您的 DeepSeek API Key"
                       className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
                     />
                   </div>
 
-                  {config.engine === 'openai' && (
-                    <div>
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">代理地址 (Base URL)</label>
-                      <input 
-                        type="text"
-                        value={config.baseUrl}
-                        onChange={(e) => setConfig({ ...config, baseUrl: e.target.value })}
-                        placeholder="https://api.deepseek.com"
-                        className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
-                      />
-                    </div>
-                  )}
+                  <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">代理地址 (Base URL)</label>
+                    <input 
+                      type="text"
+                      value={config.baseUrl}
+                      onChange={(e) => setConfig({ ...config, baseUrl: e.target.value })}
+                      placeholder="https://api.deepseek.com"
+                      className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
+                    />
+                  </div>
 
                   <div>
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">模型名称</label>
@@ -166,7 +138,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               </div>
             </div>
           </motion.div>
-        </>
+        </div>
       )}
     </AnimatePresence>
   );

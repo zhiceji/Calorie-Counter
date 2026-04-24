@@ -179,20 +179,21 @@ export function RestTimerModal({ isOpen, onClose }: RestTimerModalProps) {
           
           <motion.div 
             initial={{ opacity: 0, scale: 0.9, y: 50 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
+            animate={{ 
+              opacity: 1, 
+              scale: 1, 
+              y: 0,
+              paddingTop: status === 'idle' ? 32 : 24,
+              paddingBottom: status === 'idle' ? 32 : 20,
+            }}
             exit={{ opacity: 0, scale: 0.9, y: 50 }}
+            transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
             className={cn(
-                "relative w-full max-w-xl bg-slate-900/40 rounded-[48px] border border-white/5 shadow-2xl overflow-hidden z-10 p-8 pt-12 flex flex-col items-center",
+                "relative w-full max-w-xl bg-slate-900/40 rounded-[48px] border border-white/5 shadow-2xl overflow-hidden z-10 p-8 flex flex-col items-center",
                 status === 'running' && "border-emerald-500/30 shadow-emerald-500/10",
                 status === 'finished' && "border-rose-500/50 shadow-rose-500/20"
             )}
           >
-            <button 
-                onClick={onClose} 
-                className="absolute top-8 right-8 p-3 bg-white/5 hover:bg-white/10 rounded-full text-white/40 transition-colors"
-            >
-                <X size={20} />
-            </button>
 
             {/* Daily Stats Badge */}
             <div className="flex gap-4 mb-4">
@@ -214,10 +215,14 @@ export function RestTimerModal({ isOpen, onClose }: RestTimerModalProps) {
             </div>
 
             {/* Main Timer Display */}
-            <div className={cn(
-                "w-full flex flex-col items-center justify-center min-h-[180px] transition-colors duration-500",
-                status === 'idle' ? "text-slate-500" : status === 'running' ? "text-emerald-400" : "text-rose-500"
-            )}>
+            <motion.div 
+                className={cn(
+                    "w-full flex flex-col items-center justify-center transition-colors duration-500",
+                    status === 'idle' ? "text-slate-500 min-h-[180px]" : status === 'running' ? "text-emerald-400 min-h-[140px]" : "text-rose-500 min-h-[140px]"
+                )}
+                animate={{ minHeight: status === 'idle' ? 180 : 140 }}
+                transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+            >
                 {status === 'finished' ? (
                     <div className="text-center">
                         <motion.div 
@@ -234,14 +239,17 @@ export function RestTimerModal({ isOpen, onClose }: RestTimerModalProps) {
                         {formatTime(timeLeft)}
                     </div>
                 )}
-            </div>
+            </motion.div>
 
             {/* Slider Section */}
             <AnimatePresence mode="wait">
                 {status === 'idle' && (
                     <motion.div 
-                        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                        className="w-full mt-8 mb-12"
+                        initial={{ opacity: 0, height: 0, marginTop: 0, marginBottom: 0 }}
+                        animate={{ opacity: 1, height: 'auto', marginTop: 32, marginBottom: 48 }}
+                        exit={{ opacity: 0, height: 0, marginTop: 0, marginBottom: 0 }}
+                        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                        className="w-full overflow-hidden"
                     >
                          <div className="flex justify-between mb-4 px-2">
                              <p className="text-[10px] font-black text-white/20 uppercase tracking-widest">休息时长调节</p>
@@ -267,7 +275,11 @@ export function RestTimerModal({ isOpen, onClose }: RestTimerModalProps) {
             </AnimatePresence>
 
             {/* Action Area */}
-            <div className="w-full mt-auto flex flex-col gap-6">
+            <motion.div 
+              className="w-full flex flex-col gap-4"
+              animate={{ marginTop: status === 'idle' ? 'auto' : 8 }}
+              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            >
                 <div className="flex gap-6 w-full h-32">
                     {/* Reset Button */}
                     <button 
@@ -299,10 +311,14 @@ export function RestTimerModal({ isOpen, onClose }: RestTimerModalProps) {
                     </button>
                 </div>
                 
-                <p className="text-center text-[10px] font-bold text-white/20 uppercase tracking-[0.4em]">
-                    Rest & Recover • Geometric Strength
-                </p>
-            </div>
+                {/* Close Button at Bottom */}
+                <button 
+                    onClick={onClose} 
+                    className="w-full mt-2 py-3 bg-white/5 hover:bg-white/10 rounded-full text-white/40 hover:text-white/60 transition-colors text-xs font-bold uppercase tracking-widest"
+                >
+                    关闭
+                </button>
+            </motion.div>
           </motion.div>
         </div>
       )}

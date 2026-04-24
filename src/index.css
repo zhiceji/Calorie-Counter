@@ -15,3 +15,12 @@ body {
   @apply transition-all duration-200 outline-none;
 }
 
+/* 移除所有元素的 focus outline */
+*:focus {
+  outline: none !important;
+}
+
+*:focus-visible {
+  outline: none !important;
+}
+

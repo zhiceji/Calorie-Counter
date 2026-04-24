@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { MacroSummary } from '../types';
 import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
@@ -15,6 +15,8 @@ interface DashboardProps {
   onShowTimer?: () => void;
 }
 
+const MACRO_GOALS_KEY = 'nutri_macro_goals';
+
 export function Dashboard({ summary, target, weight, onUpdateTarget, onUpdateWeight, onShowChart, onShowWeeklyStats, onShowTimer }: DashboardProps) {
   const intake = summary.calories;
   const exercise = Math.abs(summary.exercise);
@@ -26,11 +28,26 @@ export function Dashboard({ summary, target, weight, onUpdateTarget, onUpdateWei
   const circumference = 2 * Math.PI * radius;
   const dashoffset = circumference - (progress / 100) * circumference;
 
-  const [macroGoals, setMacroGoals] = React.useState({ carbs: 250, protein: 120, fat: 70 });
+  const [macroGoals, setMacroGoals] = useState({ carbs: 250, protein: 120, fat: 70 });
+
+  useEffect(() => {
+    const saved = localStorage.getItem(MACRO_GOALS_KEY);
+    if (saved) {
+      try {
+        setMacroGoals(JSON.parse(saved));
+      } catch (e) {}
+    }
+  }, []);
+
+  const handleMacroEdit = (key: 'carbs' | 'protein' | 'fat', val: number) => {
+    const newGoals = { ...macroGoals, [key]: val };
+    setMacroGoals(newGoals);
+    localStorage.setItem(MACRO_GOALS_KEY, JSON.stringify(newGoals));
+  };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 px-6">
-      <div className="lg:col-span-2 bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm flex items-center justify-between">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6 px-6">
+      <div className="lg:col-span-2 bg-white rounded-[32px] py-8 px-6 border border-slate-100 shadow-sm flex items-center justify-between w-[338px] h-[207px]">
         <div className="flex-1">
           <div className="flex justify-between items-start mb-2">
             <p className="text-slate-400 text-xs font-bold uppercase tracking-[0.2em]">剩余可摄入热量</p>
@@ -57,7 +74,7 @@ export function Dashboard({ summary, target, weight, onUpdateTarget, onUpdateWei
             还可以吃 <span className="text-emerald-500">{remaining.toLocaleString()}</span> <span className="text-xl font-normal text-slate-400">kcal</span>
           </motion.h1>
           
-          <div className="mt-8 flex flex-wrap items-center gap-x-4 sm:gap-x-10 gap-y-4">
+          <div className="mt-6 flex items-center gap-x-3 sm:gap-x-4 overflow-hidden">
             <StatsItem label="目标" value={target} color="text-slate-700" isEditable onEdit={onUpdateTarget} />
             <StatsItem label="摄入" value={intake} color="text-slate-700" />
             <StatsItem label="运动" value={exercise} color="text-sky-500" prefix="+" />
@@ -65,38 +82,20 @@ export function Dashboard({ summary, target, weight, onUpdateTarget, onUpdateWei
               <StatsItem label="体重" value={weight || 0} color="text-emerald-500" suffix="kg" isEditable onEdit={(val) => onUpdateWeight?.(val === 0 ? undefined : val)} />
               <button 
                 onClick={onShowChart}
-                className="mt-4 p-1.5 bg-slate-50 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-all"
+                className="p-1 bg-slate-50 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-all shrink-0"
               >
-                <TrendingUp size={14} />
+                <TrendingUp size={12} />
               </button>
             </div>
           </div>
         </div>
-
-        <div className="relative w-28 h-28 hidden sm:flex items-center justify-center shrink-0 ml-4">
-          <svg className="absolute inset-0 w-full h-full -rotate-90">
-            <circle cx="56" cy="56" r={radius} fill="transparent" stroke="#f1f5f9" strokeWidth="10" />
-            <motion.circle 
-              cx="56" cy="56" r={radius} 
-              fill="transparent" stroke="#10b981" strokeWidth="10" 
-              strokeDasharray={circumference} 
-              initial={{ strokeDashoffset: circumference }}
-              animate={{ strokeDashoffset: dashoffset }}
-              transition={{ duration: 1.5, ease: "easeOut" }}
-              strokeLinecap="round" 
-            />
-          </svg>
-          <span className="text-sm font-black text-slate-800">{Math.round(progress)}%</span>
-        </div>
       </div>
 
-      <div className="bg-slate-900 rounded-[32px] p-8 flex flex-col justify-between shadow-xl shadow-slate-900/10">
-        <div className="space-y-6">
-          <MacroBar label="碳水" current={summary.carbs} goal={macroGoals.carbs} color="bg-amber-400" onEditGoal={(val) => setMacroGoals(prev => ({...prev, carbs: val}))} />
-          <MacroBar label="蛋白质" current={summary.protein} goal={macroGoals.protein} color="bg-rose-400" onEditGoal={(val) => setMacroGoals(prev => ({...prev, protein: val}))} />
-          <MacroBar label="脂肪" current={summary.fat} goal={macroGoals.fat} color="bg-sky-400" onEditGoal={(val) => setMacroGoals(prev => ({...prev, fat: val}))} />
-        </div>
-        <p className="text-[10px] text-slate-500 uppercase tracking-[0.2em] mt-8 font-bold">结构平衡: 已优化</p>
+      {/* 宏量营养素圆形进度 */}
+      <div className="bg-slate-900 rounded-[32px] py-6 px-4 flex items-center justify-around shadow-xl shadow-slate-900/10 h-[130px]">
+        <MacroCircle label="碳水" current={summary.carbs} goal={macroGoals.carbs} color="#fbbf24" />
+        <MacroCircle label="蛋白质" current={summary.protein} goal={macroGoals.protein} color="#fb7185" />
+        <MacroCircle label="脂肪" current={summary.fat} goal={macroGoals.fat} color="#38bdf8" />
       </div>
     </div>
   );
@@ -114,60 +113,52 @@ function StatsItem({ label, value, color, prefix = "", suffix = "", isEditable, 
   };
 
   return (
-    <div>
-      <p className="text-[10px] text-slate-400 uppercase font-black tracking-wider mb-0.5">{label}</p>
-      <div className={cn("text-lg font-black tracking-tight flex items-baseline gap-1", color)}>
+    <div className="shrink-0">
+      <p className="text-[9px] text-slate-400 uppercase font-black tracking-wider mb-0.5">{label}</p>
+      <div className={cn("text-sm font-black tracking-tight flex items-baseline gap-0.5", color)}>
         {prefix}
         <span
           ref={valRef}
           contentEditable={isEditable}
           suppressContentEditableWarning
           onBlur={handleBlur}
-          className={cn(isEditable && "border-b border-dashed border-slate-200 min-w-[20px] outline-none focus:border-emerald-500")}
+          className={cn(isEditable && "border-b border-dashed border-slate-200 min-w-[16px] outline-none focus:border-emerald-500")}
         >
           {value || (isEditable ? '0' : '0')}
         </span>
-        <span className="text-[10px] font-bold text-slate-300 ml-0.5">{suffix}</span>
+        <span className="text-[9px] font-bold text-slate-300 ml-0.5">{suffix}</span>
       </div>
     </div>
   );
 }
 
-function MacroBar({ label, current, goal, color, onEditGoal }: { label: string, current: number, goal: number, color: string, onEditGoal?: (val: number) => void }) {
+function MacroCircle({ label, current, goal, color }: { label: string, current: number, goal: number, color: string }) {
   const percentage = Math.min((current / goal) * 100, 100);
-  const goalRef = React.useRef<HTMLSpanElement>(null);
-
-  const handleBlur = () => {
-    if (onEditGoal && goalRef.current) {
-      const newVal = parseFloat(goalRef.current.innerText);
-      if (!isNaN(newVal)) onEditGoal(newVal);
-    }
-  };
+  const r = 24;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (percentage / 100) * circ;
 
   return (
-    <div>
-      <div className="flex justify-between mb-2">
-        <span className="text-[10px] font-black text-white uppercase tracking-wider">
-          {label} ({Math.round(current)}g/
-          <span
-            ref={goalRef}
-            contentEditable
-            suppressContentEditableWarning
-            onBlur={handleBlur}
-            className="border-b border-transparent focus:border-emerald-500 outline-none"
-          >
-            {goal}
-          </span>
-          g)
-        </span>
-        <span className="text-[10px] font-bold text-slate-500">{Math.round(percentage)}%</span>
+    <div className="flex flex-col items-center gap-0">
+      <div className="relative w-16 h-16">
+        <svg className="absolute inset-0 w-full h-full -rotate-90">
+          <circle cx="32" cy="32" r={r} fill="transparent" stroke="#334155" strokeWidth="6" />
+          <motion.circle
+            cx="32" cy="32" r={r}
+            fill="transparent" stroke={color} strokeWidth="6"
+            strokeDasharray={circ}
+            initial={{ strokeDashoffset: circ }}
+            animate={{ strokeDashoffset: offset }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
+            strokeLinecap="round"
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-[10px] font-black text-white">{Math.round(percentage)}%</span>
+        </div>
       </div>
-      <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-        <motion.div 
-          initial={{ width: 0 }} animate={{ width: `${percentage}%` }}
-          className={cn("h-full rounded-full", color)} 
-        />
-      </div>
+      <span className="text-[9px] font-bold text-slate-400">{label}</span>
+      <span className="text-[8px] font-bold text-slate-500">{current}g/{goal}g</span>
     </div>
   );
 }

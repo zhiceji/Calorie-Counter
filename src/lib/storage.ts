@@ -4,7 +4,17 @@ import { DayData, MealRecord, FavoriteItem } from '../types';
 
 const STORAGE_PREFIX = 'nutriai_day_';
 const FAVORITES_KEY = 'nutriai_favorites';
+const DEFAULT_TARGET_KEY = 'nutri_default_target';
 const DEFAULT_TARGET = 2000;
+
+export function getDefaultTarget(): number {
+  const saved = localStorage.getItem(DEFAULT_TARGET_KEY);
+  return saved ? parseInt(saved, 10) : DEFAULT_TARGET;
+}
+
+export function setDefaultTarget(target: number): void {
+  localStorage.setItem(DEFAULT_TARGET_KEY, String(target));
+}
 
 export function useDayData(date: Date) {
   const dateKey = format(date, 'yyyy-MM-dd');
@@ -15,7 +25,7 @@ export function useDayData(date: Date) {
     if (saved) {
       return JSON.parse(saved);
     }
-    return { meals: [], target: DEFAULT_TARGET };
+    return { meals: [], target: getDefaultTarget() };
   });
 
   useEffect(() => {
@@ -23,7 +33,7 @@ export function useDayData(date: Date) {
     if (saved) {
       setData(JSON.parse(saved));
     } else {
-      setData({ meals: [], target: DEFAULT_TARGET });
+      setData({ meals: [], target: getDefaultTarget() });
     }
   }, [storageId]);
 
@@ -124,7 +134,7 @@ export function useWeeklyStats(trigger?: any) {
     const weeklyData = last7Days.map(dateKey => {
       const dayData = JSON.parse(localStorage.getItem(STORAGE_PREFIX + dateKey) || JSON.stringify({
         meals: [],
-        target: 2000,
+        target: getDefaultTarget(),
         weight: undefined
       }));
 
