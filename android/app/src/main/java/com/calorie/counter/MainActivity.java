@@ -4,6 +4,9 @@ import android.os.Bundle;
 import android.util.Base64;
 import android.content.Intent;
 import android.net.Uri;
+import android.graphics.Color;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.core.content.FileProvider;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -14,6 +17,27 @@ public class MainActivity extends BridgeActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        // 1. 关键：先启用全屏布局支持，这是 Android 15+ 的新要求
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        
+        // 2. 设置状态栏为透明（ColorOS 16 强制沉浸式，设置白色背景有时会被系统拦截）
+        getWindow().setStatusBarColor(Color.TRANSPARENT);
+
+        // 3. 使用 WindowInsetsControllerCompat (官方推荐的兼容库写法，优先级最高)
+        WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        // true 表示"亮色状态栏"，即文字和图标变为深色
+        controller.setAppearanceLightStatusBars(true);
+    }
+    
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            // 每次窗口获得焦点时重新设置状态栏
+            WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+            controller.setAppearanceLightStatusBars(true);
+        }
     }
 
     /**

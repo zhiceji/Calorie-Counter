@@ -11,7 +11,7 @@ interface CalendarStripProps {
 
 export function CalendarStrip({ selectedDate, onOpenMonthView, headerButtons }: CalendarStripProps) {
   return (
-    <div className="max-w-4xl mx-auto px-6" style={{ paddingTop: '19px', paddingBottom: '12px' }}>
+    <div className="max-w-4xl mx-auto px-6" style={{ paddingTop: '23px', paddingBottom: '12px' }}>
       <div className="flex justify-between items-center">
         <button 
           onClick={onOpenMonthView}

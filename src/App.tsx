@@ -23,7 +23,6 @@ import { RestTimerModal } from './components/RestTimerModal';
 import { useDayData, useWeightHistory, useWeeklyStats } from './lib/storage';
 import { MacroSummary, MealType, MealRecord } from './types';
 import { User, Plus, Settings } from 'lucide-react';
-import { StatusBar, Style } from '@capacitor/status-bar';
 import { Capacitor } from '@capacitor/core';
 
 // Last Updated: 笑匠私人特制 - 2026-04-23
@@ -37,14 +36,7 @@ export default function App() {
   const [isTimerOpen, setIsTimerOpen] = useState(false);
   const [editingMeal, setEditingMeal] = useState<MealRecord | null>(null);
 
-  // 初始化沉浸式状态栏
-  useEffect(() => {
-    if (Capacitor.isNativePlatform()) {
-      StatusBar.setStyle({ style: Style.Dark }); // 深色图标
-      StatusBar.setBackgroundColor({ color: '#ffffff' }); // 白色背景确保状态栏文字可见
-      StatusBar.setOverlaysWebView({ overlay: false }); // 确保状态栏不覆盖内容
-    }
-  }, []);
+  // 状态栏设置已移至 MainActivity.java，避免 Capacitor StatusBar 插件覆盖
   const { data, addRecords, updateMeal, deleteMeal, updateTarget, updateWeight } = useDayData(selectedDate);
   const weightHistory = useWeightHistory(isChartOpen);
   const weeklyStats = useWeeklyStats(isStatsOpen);
