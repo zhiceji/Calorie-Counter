@@ -3,8 +3,8 @@ import { X, Settings, Activity, CheckCircle2, AlertCircle, Download, RefreshCw, 
 import { motion, AnimatePresence } from 'motion/react';
 import { ApiConfig, testApiConnection } from '../lib/gemini';
 import { cn } from '../lib/utils';
-import { checkForUpdate, getCurrentVersion, UpdateStatus, ReleaseInfo, downloadApk } from '../lib/updateChecker';
-import { installApkFromBase64, openUrlInBrowser } from '../lib/nativeBridge';
+import { checkForUpdate, getCurrentVersion, UpdateStatus, ReleaseInfo } from '../lib/updateChecker';
+import { openUrlInBrowser } from '../lib/nativeBridge';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -22,7 +22,6 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   // 更新检查状态
   const [updateStatus, setUpdateStatus] = useState<UpdateStatus | null>(null);
   const [checkUpdateLoading, setCheckUpdateLoading] = useState(false);
-  const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem('nutri_api_config');
