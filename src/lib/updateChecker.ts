@@ -56,11 +56,16 @@ export async function checkForUpdate(): Promise<UpdateStatus> {
     
     // 查找 APK 文件
     let apkUrl = '';
+    let apkName = '';
     for (const asset of data.assets || []) {
       if (asset.name.endsWith('.apk')) {
-        apkUrl = asset.browser_download_url;
+        apkName = asset.name;
         break;
       }
+    }
+    // 使用 jsDelivr 镜像加速（国内可用）
+    if (apkName) {
+      apkUrl = `https://cdn.jsdelivr.net/gh/${GITHUB_REPO}@${latestVersion}/android/app/build/outputs/apk/debug/${apkName}`;
     }
 
     const releaseInfo: ReleaseInfo = {

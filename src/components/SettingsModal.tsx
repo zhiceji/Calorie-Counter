@@ -3,8 +3,8 @@ import { X, Settings, Activity, CheckCircle2, AlertCircle, Download, RefreshCw, 
 import { motion, AnimatePresence } from 'motion/react';
 import { ApiConfig, testApiConnection } from '../lib/gemini';
 import { cn } from '../lib/utils';
-import { checkForUpdate, getCurrentVersion, UpdateStatus, ReleaseInfo } from '../lib/updateChecker';
-import { downloadAndInstall, openUrlInBrowser } from '../lib/nativeBridge';
+import { checkForUpdate, getCurrentVersion, UpdateStatus, ReleaseInfo, downloadApk } from '../lib/updateChecker';
+import { installApkFromBase64, openUrlInBrowser } from '../lib/nativeBridge';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -57,12 +57,16 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     if (!updateStatus?.releaseInfo?.downloadUrl) return;
     
     setDownloadProgress(0);
-    const success = await downloadAndInstall(updateStatus.releaseInfo.downloadUrl, (progress) => {
-      setDownloadProgress(progress);
-    });
-    
-    if (!success) {
-      // 下载失败，尝试在浏览器中打开
+    try {
+      const base64 = await downloadApk(updateStatus.releaseInfo.downloadUrl, (progress) => {
+        setDownloadProgress(progress);
+      });
+      await installApkFromBase64(base64);
+      setDownloadProgress(null);
+    } catch (error) {
+      console.error('下载失败:', error);
+      setDownloadProgress(null);
+      // 下载失败则用浏览器打开
       openUrlInBrowser(updateStatus.releaseInfo.downloadUrl);
     }
   };
@@ -221,13 +225,13 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                             <button 
                               onClick={handleDownloadUpdate}
                               disabled={downloadProgress !== null}
-                              className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1 disabled:opacity-50"
+                              className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1 disabled:opacity-70"
                             >
                               {downloadProgress !== null ? (
                                 <>
                                   <div className="w-16 h-1.5 bg-emerald-200 rounded-full overflow-hidden">
                                     <div 
-                                      className="h-full bg-emerald-500 transition-all"
+                                      className="h-full bg-white transition-all"
                                       style={{ width: `${downloadProgress}%` }}
                                     />
                                   </div>
