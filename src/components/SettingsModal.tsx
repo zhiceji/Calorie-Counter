@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { X, Settings, Activity, CheckCircle2, AlertCircle } from 'lucide-react';
+import { X, Settings, Activity, CheckCircle2, AlertCircle, Download, RefreshCw, Package } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ApiConfig, testApiConnection } from '../lib/gemini';
 import { cn } from '../lib/utils';
+import { checkForUpdate, getCurrentVersion, UpdateStatus, ReleaseInfo } from '../lib/updateChecker';
+import { downloadAndInstall, openUrlInBrowser } from '../lib/nativeBridge';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -16,6 +18,11 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     model: 'deepseek-chat'
   });
   const [testStatus, setTestStatus] = useState<{ loading: boolean; success?: boolean; message?: string }>({ loading: false });
+  
+  // 更新检查状态
+  const [updateStatus, setUpdateStatus] = useState<UpdateStatus | null>(null);
+  const [checkUpdateLoading, setCheckUpdateLoading] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem('nutri_api_config');
@@ -35,6 +42,29 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     setTestStatus({ loading: true });
     const result = await testApiConnection(config);
     setTestStatus({ loading: false, success: result.success, message: result.message });
+  };
+
+  const handleCheckUpdate = async () => {
+    setCheckUpdateLoading(true);
+    setUpdateStatus(null);
+    setDownloadProgress(null);
+    const status = await checkForUpdate();
+    setUpdateStatus(status);
+    setCheckUpdateLoading(false);
+  };
+
+  const handleDownloadUpdate = async () => {
+    if (!updateStatus?.releaseInfo?.downloadUrl) return;
+    
+    setDownloadProgress(0);
+    const success = await downloadAndInstall(updateStatus.releaseInfo.downloadUrl, (progress) => {
+      setDownloadProgress(progress);
+    });
+    
+    if (!success) {
+      // 下载失败，尝试在浏览器中打开
+      openUrlInBrowser(updateStatus.releaseInfo.downloadUrl);
+    }
   };
 
   return (
@@ -134,6 +164,98 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                   >
                     保存并应用
                   </button>
+                </div>
+
+                {/* 检查更新区域 */}
+                <div className="mt-6 pt-6 border-t border-slate-100">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <Package size={16} className="text-slate-400" />
+                      <span className="text-xs font-bold text-slate-500">应用版本 {getCurrentVersion()}</span>
+                    </div>
+                    <button 
+                      onClick={handleCheckUpdate}
+                      disabled={checkUpdateLoading}
+                      className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-500 text-xs font-bold rounded-lg transition-all"
+                    >
+                      {checkUpdateLoading ? (
+                        <RefreshCw size={12} className="animate-spin" />
+                      ) : (
+                        <RefreshCw size={12} />
+                      )}
+                      检查更新
+                    </button>
+                  </div>
+
+                  {/* 更新状态显示 */}
+                  {updateStatus && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={cn(
+                        "rounded-2xl p-4",
+                        updateStatus.hasUpdate 
+                          ? "bg-emerald-50 border border-emerald-100" 
+                          : "bg-slate-50"
+                      )}
+                    >
+                      {updateStatus.hasUpdate ? (
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center">
+                              <CheckCircle2 size={14} />
+                            </div>
+                            <span className="text-sm font-black text-emerald-700">
+                              发现新版本 v{updateStatus.latestVersion}
+                            </span>
+                          </div>
+                          
+                          {updateStatus.releaseInfo?.releaseNotes && (
+                            <div className="text-xs text-slate-500 bg-white/50 rounded-lg p-2 max-h-20 overflow-y-auto">
+                              {updateStatus.releaseInfo.releaseNotes.slice(0, 200)}
+                              {updateStatus.releaseInfo.releaseNotes.length > 200 && '...'}
+                            </div>
+                          )}
+
+                          <div className="flex gap-2">
+                            <button 
+                              onClick={handleDownloadUpdate}
+                              disabled={downloadProgress !== null}
+                              className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1 disabled:opacity-50"
+                            >
+                              {downloadProgress !== null ? (
+                                <>
+                                  <div className="w-16 h-1.5 bg-emerald-200 rounded-full overflow-hidden">
+                                    <div 
+                                      className="h-full bg-emerald-500 transition-all"
+                                      style={{ width: `${downloadProgress}%` }}
+                                    />
+                                  </div>
+                                  <span>{downloadProgress}%</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Download size={12} />
+                                  下载安装
+                                </>
+                              )}
+                            </button>
+                            <button 
+                              onClick={() => openUrlInBrowser(`https://github.com/zhiceji/Calorie-Counter/releases`)}
+                              className="px-3 bg-slate-100 hover:bg-slate-200 text-slate-600 py-2 rounded-xl text-xs font-bold transition-all"
+                            >
+                              GitHub
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                          <CheckCircle2 size={14} className="text-slate-400" />
+                          已是最新版本
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
                 </div>
               </div>
             </div>
