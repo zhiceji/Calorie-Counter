@@ -113,7 +113,7 @@ export default function App() {
         onOpenMonthView={() => setIsCalendarOpen(true)}
       />
 
-      <main className="max-w-4xl mx-auto">
+      <main className="max-w-4xl mx-auto mt-4">
         <Dashboard 
           summary={summary} 
           target={data.target} 

@@ -16,7 +16,7 @@ export function CalendarStrip({ selectedDate, onDateSelect, onOpenMonthView }: C
 
   return (
     <div className="flex justify-between px-6 py-8 bg-transparent">
-      <div className="flex space-x-4 overflow-x-auto no-scrollbar pb-2 flex-1 md:mr-8">
+      <div className="flex space-x-4 overflow-x-auto no-scrollbar pb-2 flex-1 md:mr-8 pr-4">
         {weekDays.map((day) => {
           const isSelected = isSameDay(day, selectedDate);
           
